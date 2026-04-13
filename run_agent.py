@@ -1129,6 +1129,17 @@ class AIAgent:
         self._memory_flush_min_turns = 6
         self._turns_since_memory = 0
         self._iters_since_skill = 0
+
+        # Signal detection + session state (zero-cost learning capture)
+        self._session_state = None
+        self._signal_detector = None
+        try:
+            from agent.session_state import SessionState
+            from agent.signal_detector import SignalDetector
+            self._session_state = SessionState()
+            self._signal_detector = SignalDetector()
+        except Exception:
+            pass  # Signal detection is optional
         if not skip_memory:
             try:
                 mem_config = _agent_cfg.get("memory", {})
@@ -2137,11 +2148,32 @@ class AIAgent:
         "If nothing stands out, just say 'Nothing to save.' and stop."
     )
 
+    _SIGNAL_DRIVEN_REVIEW_PROMPT = (
+        "Review the conversation above. The following learning signals were detected:\n\n"
+        "## Detected Signals\n"
+        "{signals_block}\n\n"
+        "## Your Task\n"
+        "For each signal, decide:\n\n"
+        "1. **Memory-worthy**: User preference, correction, or environment fact?\n"
+        "   -> Save to memory tool (target='memory' for facts, target='user' for preferences)\n\n"
+        "2. **Skill-worthy**: Reusable workflow, discovered procedure, or gotcha?\n"
+        "   -> Use skill_manage(action='create') to save as a Skill.\n"
+        "   Name format: gotcha-*, pattern-*, debug-*, tool-*\n"
+        "   Must include: trigger condition, problem, solution, why it works\n\n"
+        "3. **Not worth saving**: Signal is noise or already captured.\n"
+        "   -> Skip it.\n\n"
+        "Only act on signals that genuinely deserve persistence. "
+        "If nothing qualifies, say 'Nothing to save.' and stop."
+        "{compaction_note}"
+    )
+
     def _spawn_background_review(
         self,
         messages_snapshot: List[Dict],
         review_memory: bool = False,
         review_skills: bool = False,
+        learning_signals: str = "",
+        compaction_note: str = "",
     ) -> None:
         """Spawn a background thread to review the conversation for memory/skill saves.
 
@@ -2152,8 +2184,13 @@ class AIAgent:
         """
         import threading
 
-        # Pick the right prompt based on which triggers fired
-        if review_memory and review_skills:
+        # Pick the right prompt — prefer signal-driven when signals exist
+        if learning_signals and learning_signals != "No learning signals detected this session.":
+            prompt = self._SIGNAL_DRIVEN_REVIEW_PROMPT.format(
+                signals_block=learning_signals,
+                compaction_note=compaction_note or "",
+            )
+        elif review_memory and review_skills:
             prompt = self._COMBINED_REVIEW_PROMPT
         elif review_memory:
             prompt = self._MEMORY_REVIEW_PROMPT
@@ -3182,6 +3219,15 @@ class AIAgent:
                 user_block = self._memory_store.format_for_system_prompt("user")
                 if user_block:
                     prompt_parts.append(user_block)
+
+        # Knowledge base summary (domain-partitioned lessons)
+        try:
+            from agent.knowledge_store import get_knowledge_summary
+            _kb_summary = get_knowledge_summary()
+            if _kb_summary:
+                prompt_parts.append(_kb_summary)
+        except Exception:
+            pass
 
         # External memory provider system prompt block (additive to built-in)
         if self._memory_manager:
@@ -7993,6 +8039,20 @@ class AIAgent:
             except Exception:
                 pass
 
+        # Keyword-match domain lessons and append to prefetch cache
+        if isinstance(original_user_message, str) and original_user_message:
+            try:
+                from agent.knowledge_store import search_lessons
+                _matched_lessons = search_lessons(original_user_message)
+                if _matched_lessons:
+                    _lesson_lines = ["[Relevant experience from knowledge base]"]
+                    for _ml in _matched_lessons[:5]:
+                        _lesson_lines.append(f"- {_ml['code']}: {_ml['lesson']}")
+                    _lessons_ctx = "\n".join(_lesson_lines)
+                    _ext_prefetch_cache = (_ext_prefetch_cache + "\n\n" + _lessons_ctx).strip()
+            except Exception:
+                pass
+
         while (api_call_count < self.max_iterations and self.iteration_budget.remaining > 0) or self._budget_grace_call:
             # Reset per-turn checkpoint dedup so each iteration can take one snapshot
             self._checkpoint_mgr.new_turn()
@@ -10530,15 +10590,59 @@ class AIAgent:
             except Exception:
                 pass
 
+        # ── Signal detection (zero-cost, every turn) ────────────
+        if final_response and not interrupted and self._signal_detector:
+            try:
+                self._session_state.turn_count += 1
+                # Detect learning signals from assistant response
+                for sig in self._signal_detector.detect_signals(final_response, source="assistant"):
+                    self._session_state.add_signal(sig)
+                # Detect learning signals from user message
+                if isinstance(original_user_message, str):
+                    for sig in self._signal_detector.detect_signals(original_user_message, source="user"):
+                        self._session_state.add_signal(sig)
+                    # Detect procedural candidates
+                    proc_sig = self._signal_detector.detect_procedural(
+                        tool_call_count=api_call_count,
+                        had_strategy_change=False,
+                        user_msg=original_user_message,
+                    )
+                    if proc_sig:
+                        self._session_state.add_signal(proc_sig)
+                    # Detect user sentiment
+                    sentiment = self._signal_detector.detect_sentiment(original_user_message)
+                    if sentiment:
+                        self._session_state.add_sentiment(sentiment)
+                    # Detect explicit rating
+                    rating = self._signal_detector.detect_rating(original_user_message)
+                    if rating:
+                        self._session_state.last_rating = rating
+            except Exception:
+                pass  # Signal detection is best-effort
+
+        # ── Enhanced review trigger logic ────────────────────
+        _should_review_signals = False
+        if self._session_state and self._session_state.should_trigger_review(
+            base_interval=self._memory_nudge_interval
+        ):
+            _should_review_signals = True
+
         # Background memory/skill review — runs AFTER the response is delivered
         # so it never competes with the user's task for model attention.
-        if final_response and not interrupted and (_should_review_memory or _should_review_skills):
+        _should_review = _should_review_memory or _should_review_skills or _should_review_signals
+        if final_response and not interrupted and _should_review:
             try:
+                _signals_text = self._session_state.get_signals_for_review() if self._session_state else ""
+                _compact_note = self._session_state.get_memory_compaction_note(self._memory_store) if self._session_state else ""
                 self._spawn_background_review(
                     messages_snapshot=list(messages),
-                    review_memory=_should_review_memory,
-                    review_skills=_should_review_skills,
+                    review_memory=_should_review_memory or _should_review_signals,
+                    review_skills=_should_review_skills or _should_review_signals,
+                    learning_signals=_signals_text,
+                    compaction_note=_compact_note,
                 )
+                if self._session_state:
+                    self._session_state.mark_review_done()
             except Exception:
                 pass  # Background review is best-effort
 
@@ -10548,6 +10652,20 @@ class AIAgent:
         # provider before the second message. Actual session-end cleanup is
         # handled by the CLI (atexit / /reset) and gateway (session expiry /
         # _reset_session).
+
+        # ── Session summary (write to ~/.zorro/sessions/) ────────
+        if self._session_state and self._session_state.turn_count > 0:
+            try:
+                from agent.session_lifecycle import write_session_summary
+                write_session_summary(
+                    session_id=self.session_id,
+                    turn_count=self._session_state.turn_count,
+                    learning_candidates=self._session_state.learning_candidates,
+                    final_response=final_response or "",
+                    original_user_message=original_user_message if isinstance(original_user_message, str) else "",
+                )
+            except Exception:
+                pass  # Best-effort
 
         # Plugin hook: on_session_end
         # Fired at the very end of every run_conversation call.
