@@ -427,6 +427,8 @@ async def _send_to_platform(platform, pconfig, chat_id, message, thread_id=None,
             result = await _send_wecom(pconfig.extra, chat_id, chunk)
         elif platform == Platform.BLUEBUBBLES:
             result = await _send_bluebubbles(pconfig.extra, chat_id, chunk)
+        elif platform == Platform.TEAMS:
+            result = await _send_teams(pconfig.extra, chat_id, chunk)
         else:
             result = {"error": f"Direct sending not yet implemented for {platform.value}"}
 
@@ -967,6 +969,33 @@ async def _send_bluebubbles(extra, chat_id, message):
             await adapter.disconnect()
     except Exception as e:
         return _error(f"BlueBubbles send failed: {e}")
+
+
+async def _send_teams(extra, chat_id, message):
+    """Send via Microsoft Teams using the adapter's Bot Framework REST API."""
+    try:
+        from gateway.platforms.teams import TeamsAdapter, check_teams_requirements
+        if not check_teams_requirements():
+            return {"error": "Teams requirements not met (need botbuilder-core)."}
+    except ImportError:
+        return {"error": "Teams adapter not available."}
+
+    try:
+        from gateway.config import PlatformConfig
+        pconfig = PlatformConfig(extra=extra)
+        adapter = TeamsAdapter(pconfig)
+        connected = await adapter.connect()
+        if not connected:
+            return _error("Teams: failed to start webhook server")
+        try:
+            result = await adapter.send(chat_id, message)
+            if not result.success:
+                return _error(f"Teams send failed: {result.error}")
+            return {"success": True, "platform": "teams", "chat_id": chat_id, "message_id": result.message_id}
+        finally:
+            await adapter.disconnect()
+    except Exception as e:
+        return _error(f"Teams send failed: {e}")
 
 
 async def _send_feishu(pconfig, chat_id, message, media_files=None, thread_id=None):

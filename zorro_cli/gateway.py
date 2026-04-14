@@ -1913,6 +1913,32 @@ _PLATFORMS = [
              "help": "Phone number or Apple ID to deliver cron results and notifications to."},
         ],
     },
+    {
+        "key": "teams",
+        "label": "Microsoft Teams",
+        "emoji": "💼",
+        "token_var": "TEAMS_APP_ID",
+        "setup_instructions": [
+            "1. Go to https://portal.azure.com → Create resource → Azure Bot",
+            "2. Note the Microsoft App ID, then create a client secret (App Password)",
+            "3. Under Channels, enable Microsoft Teams",
+            "4. Set the Messaging endpoint to https://<your-domain>:3978/api/messages",
+            "5. The endpoint must be publicly accessible over HTTPS",
+            "   (use ngrok, Cloudflare Tunnel, or a reverse proxy for development)",
+            "6. In Teams, search for the bot by name and start a conversation",
+        ],
+        "vars": [
+            {"name": "TEAMS_APP_ID", "prompt": "Microsoft App ID", "password": False,
+             "help": "From Azure Bot registration → Configuration."},
+            {"name": "TEAMS_APP_PASSWORD", "prompt": "App Password (client secret)", "password": True,
+             "help": "From Azure Bot registration → Manage Password → New client secret."},
+            {"name": "TEAMS_ALLOWED_USERS", "prompt": "Allowed user emails (comma-separated, or empty for all)", "password": False,
+             "is_allowlist": True,
+             "help": "Optional — restrict which Microsoft 365 accounts can interact with the bot."},
+            {"name": "TEAMS_HOME_CHANNEL", "prompt": "Home channel (conversation ID for cron/notifications, or empty)", "password": False,
+             "help": "Conversation ID for delivering cron results and notifications."},
+        ],
+    },
 ]
 
 
