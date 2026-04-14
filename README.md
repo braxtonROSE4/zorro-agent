@@ -12,119 +12,142 @@
   <img src="https://img.shields.io/badge/Platforms-19-blue?style=for-the-badge" alt="19 Platforms">
 </p>
 
-> *"Zorro never strikes the same way twice — but he always leaves his mark."*
+**A self-evolving CLI agent.** Most agents treat memory as an afterthought — a flat text file that grows until it's useless. Zorro was designed around a different idea: that the real value of an agent isn't what it can do on day one, but how much stronger it gets by day one hundred.
 
-In the 1919 novel *The Curse of Capistrano*, a young nobleman named Diego puts on a black mask and becomes Zorro — not because he was born a fighter, but because every encounter taught him something. Each duel sharpened his blade. Each escape refined his strategy. Each mark he carved — that signature **Z** — was proof that the experience had been absorbed.
+The name comes from the fictional swordsman who carved a **Z** after every encounter — not out of vanity, but as proof that the experience had been absorbed. This agent does something similar. Every session leaves a mark: a detected learning signal, a lesson filed into the right domain, a workflow crystallized into a reusable skill. Over time, these marks compound. The agent that helped you debug authentication last month now *knows* your codebase's auth patterns and applies them without being told.
 
-**Zorro Agent works the same way.** It starts as a blank agent. But every conversation leaves a mark — a detected signal, a distilled lesson, a new skill. It doesn't just process your requests and forget. It **evolves through use**, turning session experience into domain knowledge, and domain knowledge into executable capabilities.
+Use any model — [OpenRouter](https://openrouter.ai) (200+ models), OpenAI, Anthropic, Gemini, Kimi, MiniMax, Ollama, or your own endpoint. Talk to it from the terminal, Telegram, Discord, Teams, iMessage, or 14 other platforms. Switch models with `zorro model` — no code changes, no lock-in.
 
 ---
 
-## The Mark — How Zorro Evolves
+## How the Evolution Works
 
-Just like the fictional Zorro carves a Z after every encounter, Zorro Agent leaves its own mark after every session — structured knowledge that makes the next session smarter.
+The framework is built around a single loop:
 
-### ⚔️ Every Duel Teaches (Signal Detection)
-
-Zorro didn't journal about his fights — he learned *during* them. This agent does the same: **8 types of learning signals** are detected on every single turn, at zero API cost:
-
-- A user correction → `[correction][high]`
-- A method that worked after trial and error → `[method_discovery][medium]`
-- A shift in understanding → `[cognitive_shift][medium]`
-- User frustration → **immediate emergency review**
-
-No blind periodic scans. No wasted API calls when nothing happened. The agent only reflects when there's something worth reflecting on.
-
-### 🗡️ The Z Mark (Domain Knowledge)
-
-Zorro's signature wasn't random — he carved it in a specific place, with specific meaning. This agent's knowledge isn't dumped into a single flat file either. It's **partitioned by domain**:
-
-```
-~/.zorro/knowledge/
-├── _general/lessons.md      # Cross-domain wisdom (G1, G2, ...)
-├── product/lessons.md       # Product design (P1, P2, ...)
-├── engineering/lessons.md   # Engineering (E1, E2, ...)
-└── growth/lessons.md        # Growth strategy (H1, H2, ...)
-```
-
-Each lesson is structured: `code | lesson | source | scenario | keywords`. The agent searches the relevant domain first, then falls back to general — like a swordsman reaching for the right technique for the right opponent.
-
-### 🎭 The Mask (Dual Identity)
-
-Diego was an unremarkable nobleman by day. Zorro was precise and lethal by night. This agent has the same duality:
-
-- **What users see**: a simple CLI prompt, a Telegram chat, a Teams message
-- **What runs beneath**: signal detection on every turn, distill compression on every large output, session lifecycle management, domain knowledge retrieval — an evolution engine invisible to the user
-
-The **SOUL.md** defines who the agent IS — principles, memory protocol, skill protocol, voice. Not a generic "be helpful" instruction, but a full identity that persists across sessions.
-
-### 🏇 From Apprentice to Master (Capability Growth)
-
-In Isabel Allende's 2005 retelling, young Diego wasn't born a master swordsman. He trained, failed, adapted, and grew. This agent follows the same arc:
-
-```
-Session 1:   Empty agent — no memory, no skills, no knowledge
-Session 10:  Working memory captures user preferences and environment facts
-Session 50:  Domain knowledge accumulates — product, engineering, growth
-Session 100: Procedural skills crystallize — the agent handles recurring
-             workflows without being told how
-```
-
-**The evolution loop:**
 ```
 experience → signal detection → domain knowledge → executable skills → stronger agent
      ↑                                                                        |
      └────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 💨 Distill (The Quick Blade)
+This isn't a metaphor — it's the actual data flow. Here's each stage:
 
-Zorro was fast — no wasted movement. When a tool returns 50,000 characters, most agents feed it all to the model (expensive) or blindly chop the middle (lossy). Zorro Agent uses a **cheap auxiliary LLM** (~$0.001) to extract only the task-relevant information:
+### 1. Signal Detection
 
-> 50K chars of `grep` output → Distill → 5K chars of exactly what the agent needs
+On every turn, a lightweight regex engine scans both the user's message and the agent's response for 8 types of learning signals — corrections, insights, errors, cognitive shifts, method discoveries, anti-patterns, profile updates, and procedural candidates. Bilingual (EN/ZH). Zero API cost.
 
-Two quality gates prevent degradation. When compression fails, it falls back gracefully. No downside — only upside.
+These signals accumulate in session state with confidence levels (`high` / `medium`). The agent doesn't stop to think about whether it learned something — the detection is automatic and invisible.
+
+```
+User: "Don't mock the database in tests — we got burned by that last quarter"
+       → [correction][high] detected, queued for review
+```
+
+### 2. Smart Review Trigger
+
+Other frameworks run a background review every N turns regardless — same cost whether the conversation had ten corrections or zero. Zorro uses three trigger paths:
+
+| Condition | What happens |
+|-----------|-------------|
+| Base interval (every 10 turns) | Standard review, same as others |
+| 2+ high-confidence signals accumulated | **Early review** — don't wait for the timer |
+| User frustration detected | **Immediate review** — something went wrong, learn from it now |
+| Nothing detected in 10 turns | **Skip entirely** — save the API call |
+
+When review fires, it's not blind. The background agent receives the pre-filtered signals with types and confidence levels, so it knows exactly what to look for in the conversation.
+
+### 3. Domain Knowledge
+
+Lessons don't go into a single file. They're partitioned by domain, each with structured entries:
+
+```
+~/.zorro/knowledge/
+├── _general/lessons.md      # Cross-domain (G1, G2, ...)
+├── product/lessons.md       # Product design (P1, P2, ...)
+├── engineering/lessons.md   # Engineering (E1, E2, ...)
+└── growth/lessons.md        # Growth/marketing (H1, H2, ...)
+```
+
+Format: `code | lesson | source | scenario | keywords`. When the agent encounters a new task, it searches the relevant domain first, then falls back to general knowledge. This is why a product question doesn't surface engineering lessons — the knowledge is organized the way an expert's mind is organized.
+
+### 4. Skill Crystallization
+
+When the review agent identifies a reusable workflow — not just a fact, but a *procedure* — it proposes saving it as a Skill. The agent asks the user first:
+
+> "I noticed that when debugging auth flows, you always check token refresh before looking at CORS. Want me to save this as a reusable skill?"
+
+If confirmed, the workflow becomes a YAML+Markdown skill file that loads automatically on future matching tasks. This is the moment experience becomes capability.
+
+### 5. Distill Compression
+
+Alongside the evolution loop, there's a practical optimization: when any tool returns more than 8K characters, a cheap auxiliary model (~$0.001 per call) compresses the output to only what's relevant to the current task. A 50K-char `grep` result becomes 5K chars of pure signal. Two quality gates reject bad compressions and fall back to traditional head/tail truncation. The main model never sees noise it doesn't need.
+
+### 6. Session Lifecycle
+
+At the end of every conversation, the agent writes a structured summary — what was asked, what signals were detected, what's unresolved. This isn't stored in the model's context (which would be expensive). It's a Markdown file in `~/.zorro/sessions/` that future sessions can search via FTS5 when context is needed.
+
+### What This Looks Like Over Time
+
+```
+Session 1:   Blank slate — no memory, no skills, no knowledge
+Session 10:  Preferences captured. Knows your tools, your style, your stack.
+Session 50:  Domain knowledge grows. Product, engineering, growth — each with
+             its own lesson library, searchable by keyword.
+Session 100: Skills crystallize. Recurring workflows run without instruction.
+             The agent handles your patterns because it learned them from you.
+```
+
+The agent on session 100 is not the same agent as session 1. That's the point.
 
 ---
 
-## How Does It Compare?
+## The Mask — What's Underneath
 
-Three frameworks claim to "learn" across sessions. Here's what each actually does:
+Like the fictional Zorro — an unremarkable nobleman by day, precise and dangerous by night — the interface is deceptively simple. Users see a CLI prompt or a chat message. Underneath:
+
+- **SOUL.md** defines who the agent is — not "be helpful" but a full identity with principles, memory protocol, skill protocol, and voice guidelines. Users can replace `~/.zorro/SOUL.md` to reshape the agent entirely.
+- **Signal detection** runs on every turn without the user knowing.
+- **Distill compression** fires on every large tool output automatically.
+- **Session summaries** are written silently at conversation end.
+- **Domain knowledge** is searched before every response.
+
+The user just talks. The evolution happens behind the mask.
+
+---
+
+## Comparison
 
 | Capability | OpenClaw | Hermes Agent | **Zorro Agent** |
 |---|---|---|---|
-| **Memory storage** | Markdown + vector search | 2.2K flat text file | 2.2K working memory + **domain-partitioned knowledge base** |
-| **Learning from experience** | None — static skills only | Blind review every 10 turns | **Signal-driven**: 8-type detection every turn (zero cost) |
-| **Skill creation** | Manual only | Autonomous | Autonomous + **user confirmation** |
-| **Tool output handling** | Raw truncation | Head/tail mechanical cut | **Distill**: auxiliary LLM extracts relevant signal |
-| **Session boundaries** | None | None | **Structured summaries** with learning inventory |
-| **Agent identity** | SOUL.md persona | One-paragraph generic | **SOUL.md** with principles, protocols, voice |
-| **User sentiment** | Not detected | Not detected | **Rating + frustration detection** (triggers review) |
-| **Review cost** | N/A | 1 API call / 10 turns always | **0 calls** when quiet; 1 call when warranted |
-| **Platforms** | 20+ | 17 | **19** (added Teams) |
+| **Memory** | Markdown + vector search | 2.2K flat text | Working memory + **domain-partitioned knowledge** |
+| **Learning** | None (static skills) | Blind review / 10 turns | **Signal-driven** (8 types, zero cost) |
+| **Skills** | Manual only | Autonomous | Autonomous + **user confirmation** |
+| **Tool output** | Raw truncation | Head/tail cut | **Distill** (auxiliary LLM extraction) |
+| **Sessions** | No boundaries | No boundaries | **Structured summaries** |
+| **Identity** | SOUL.md | One paragraph | **SOUL.md** (principles + protocols + voice) |
+| **Sentiment** | Not detected | Not detected | **Rating + frustration → triggers review** |
+| **Review cost** | N/A | 1 call / 10 turns always | **0 when quiet**, 1 when warranted |
+| **Platforms** | 20+ | 17 | **19** |
 | **Models** | Limited | 200+ | 200+ |
-| **Security** | Known CVEs | Pattern + LLM approval | Pattern + LLM approval + secret redaction |
 
-### The Honest Take
-
-- **OpenClaw**: Best platform coverage, zero learning capability, concerning security record.
-- **Hermes**: Added learning loop, but blind review (same cost whether 10 corrections or zero) and flat memory.
-- **Zorro**: Memory-first architecture — **signal detection → smart triggering → domain knowledge → distill compression → session lifecycle**. Gets stronger every session.
+- **OpenClaw**: Broad platform coverage, zero learning, security concerns.
+- **Hermes**: Added a learning loop — but blind (same cost whether there's signal or not) with flat memory.
+- **Zorro**: Memory-first. Signal detection → smart review → domain knowledge → skills → lifecycle.
 
 ---
 
-## Core Capabilities
+## Capabilities
 
 <table>
-<tr><td><b>Full TUI</b></td><td>prompt_toolkit terminal UI — multiline editing, slash commands, tab completion, streaming, interrupt handling, conversation branching.</td></tr>
-<tr><td><b>19 Platforms</b></td><td>Telegram, Discord, Slack, WhatsApp, Signal, iMessage, Microsoft Teams, WeChat, WeCom, Feishu, DingTalk, Matrix, Mattermost, Email, SMS, Home Assistant, API Server, Webhooks.</td></tr>
-<tr><td><b>100+ Tools</b></td><td>Terminal, file ops, web search, browser automation, code execution, vision, TTS, image generation, MCP servers.</td></tr>
-<tr><td><b>Skills System</b></td><td>YAML+Markdown procedural knowledge. Created from experience, loaded by relevance, patched when outdated.</td></tr>
-<tr><td><b>Session Search</b></td><td>FTS5 full-text search across all past conversations with LLM summarization.</td></tr>
-<tr><td><b>Any Model</b></td><td>OpenRouter (200+), OpenAI, Anthropic, Gemini, Kimi, MiniMax, Mistral, Ollama, or any compatible endpoint.</td></tr>
-<tr><td><b>Cron</b></td><td>Scheduled tasks in natural language, delivered to any platform.</td></tr>
+<tr><td><b>Full TUI</b></td><td>prompt_toolkit — multiline editing, slash commands, tab completion, streaming, interrupt handling, conversation branching.</td></tr>
+<tr><td><b>19 Platforms</b></td><td>Telegram, Discord, Slack, WhatsApp, Signal, iMessage, Teams, WeChat, WeCom, Feishu, DingTalk, Matrix, Mattermost, Email, SMS, Home Assistant, API Server, Webhooks.</td></tr>
+<tr><td><b>100+ Tools</b></td><td>Terminal, file ops, web search, browser, code execution, vision, TTS, image gen, MCP.</td></tr>
+<tr><td><b>Skills</b></td><td>YAML+Markdown procedural knowledge. Created from experience, loaded by relevance, patched when outdated.</td></tr>
+<tr><td><b>Session Search</b></td><td>FTS5 full-text across all past conversations, with LLM summarization.</td></tr>
+<tr><td><b>Any Model</b></td><td>OpenRouter (200+), OpenAI, Anthropic, Gemini, Kimi, MiniMax, Mistral, Ollama, any compatible endpoint.</td></tr>
+<tr><td><b>Cron</b></td><td>Natural-language scheduled tasks, delivered to any platform.</td></tr>
 <tr><td><b>Subagents</b></td><td>Isolated child agents for parallel work. Code execution via RPC.</td></tr>
-<tr><td><b>6 Backends</b></td><td>Local, Docker, SSH, Daytona, Singularity, Modal. Serverless hibernation.</td></tr>
+<tr><td><b>6 Backends</b></td><td>Local, Docker, SSH, Daytona, Singularity, Modal.</td></tr>
 <tr><td><b>Security</b></td><td>Dangerous command detection, smart LLM approval, DM pairing, secret redaction.</td></tr>
 </table>
 
@@ -136,48 +159,37 @@ Three frameworks claim to "learn" across sessions. Here's what each actually doe
 git clone https://github.com/braxtonROSE4/zorro-agent.git
 cd zorro-agent
 pip install -e ".[all]"
-zorro setup    # Configure provider + model + API key
-zorro          # Start chatting
-```
-
-## CLI Commands
-
-```
-zorro                # Interactive chat
-zorro setup          # Setup wizard
-zorro model          # Switch model
-zorro gateway        # Multi-platform gateway
-zorro status         # Configuration status
-zorro doctor         # Diagnose issues
+zorro setup    # Provider + model + API key
+zorro          # Start
 ```
 
 ## Architecture
 
 ```
 ~/.zorro/
-├── SOUL.md                     # Who the agent IS
-├── config.yaml                 # Configuration
-├── .env                        # API keys
-├── state.db                    # Sessions (SQLite + FTS5)
+├── SOUL.md                     # Agent identity
+├── config.yaml
+├── .env
+├── state.db                    # SQLite + FTS5
 ├── memories/
 │   ├── MEMORY.md               # Working memory (~2200 chars)
 │   └── USER.md                 # User profile (~1375 chars)
 ├── knowledge/                  # Domain-partitioned lessons
-│   ├── _general/lessons.md     # G-codes (cross-domain)
-│   ├── product/lessons.md      # P-codes
-│   ├── engineering/lessons.md  # E-codes
-│   └── .../lessons.md          # Extensible
-├── skills/                     # Procedural knowledge
+│   ├── _general/lessons.md
+│   ├── product/lessons.md
+│   ├── engineering/lessons.md
+│   └── .../lessons.md
+├── skills/
 │   └── <name>/SKILL.md
-├── sessions/                   # Session summaries
+├── sessions/                   # Summaries
 └── logs/
 ```
 
-## Documentation
+## Docs
 
 | Guide | Description |
 |-------|-------------|
-| [docs/imessage.md](docs/imessage.md) | iMessage setup via BlueBubbles (macOS required) |
+| [docs/imessage.md](docs/imessage.md) | iMessage via BlueBubbles (macOS required) |
 | [docs/teams.md](docs/teams.md) | Microsoft Teams via Azure Bot Framework |
 
 ## License
