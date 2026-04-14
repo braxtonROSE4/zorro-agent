@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300" width="1200" height="300">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0a0f;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1a1a2e;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="slash" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#e94560;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#c81d4e;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#e0e0e0;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="slashGlow">
+      <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="300" fill="url(#bg)" rx="12"/>
+
+  <!-- Subtle grid pattern -->
+  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#ffffff" stroke-width="0.3" opacity="0.05"/>
+  </pattern>
+  <rect width="1200" height="300" fill="url(#grid)" rx="12"/>
+
+  <!-- Zorro slash marks (signature Z) -->
+  <g filter="url(#slashGlow)" opacity="0.15">
+    <line x1="80" y1="40" x2="280" y2="40" stroke="#e94560" stroke-width="18" stroke-linecap="round"/>
+    <line x1="280" y1="40" x2="80" y2="260" stroke="#e94560" stroke-width="18" stroke-linecap="round"/>
+    <line x1="80" y1="260" x2="280" y2="260" stroke="#e94560" stroke-width="18" stroke-linecap="round"/>
+  </g>
+
+  <!-- Three diagonal slash marks (Zorro's signature) -->
+  <g filter="url(#slashGlow)">
+    <line x1="900" y1="60" x2="980" y2="240" stroke="url(#slash)" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+    <line x1="940" y1="60" x2="1020" y2="240" stroke="url(#slash)" stroke-width="4" stroke-linecap="round" opacity="0.4"/>
+    <line x1="980" y1="60" x2="1060" y2="240" stroke="url(#slash)" stroke-width="4" stroke-linecap="round" opacity="0.2"/>
+  </g>
+
+  <!-- Main title -->
+  <text x="600" y="145" text-anchor="middle" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', 'JetBrains Mono', monospace" font-size="88" font-weight="900" fill="url(#textGrad)" filter="url(#glow)" letter-spacing="8">ZORRO</text>
+
+  <!-- Subtitle -->
+  <text x="600" y="200" text-anchor="middle" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', 'JetBrains Mono', monospace" font-size="28" font-weight="400" fill="#e94560" letter-spacing="18" opacity="0.9">A G E N T</text>
+
+  <!-- Tagline -->
+  <text x="600" y="248" text-anchor="middle" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="16" fill="#888888" letter-spacing="2">the cli agent that actually remembers</text>
+
+  <!-- Version badge -->
+  <rect x="540" y="258" width="52" height="20" rx="4" fill="#e94560" opacity="0.8"/>
+  <text x="566" y="272" text-anchor="middle" font-family="monospace" font-size="11" fill="white" font-weight="600">v0.1</text>
+
+  <!-- Accent line bottom -->
+  <rect x="200" y="290" width="800" height="2" rx="1" fill="#e94560" opacity="0.3"/>
+</svg>

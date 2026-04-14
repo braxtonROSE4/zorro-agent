@@ -1,8 +1,31 @@
+<p align="center">
+  <img src="assets/banner.svg" alt="Zorro Agent" width="100%">
+</p>
+
 # Zorro Agent
 
-**The CLI agent that actually remembers.**
+<p align="center">
+  <a href="https://github.com/braxtonROSE4/zorro-agent/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License: MIT"></a>
+  <a href="https://github.com/braxtonROSE4/zorro-agent"><img src="https://img.shields.io/badge/Built%20by-Brax-e94560?style=for-the-badge" alt="Built by Brax"></a>
+  <img src="https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.11+">
+  <img src="https://img.shields.io/badge/Models-200+-FFD700?style=for-the-badge" alt="200+ Models">
+  <img src="https://img.shields.io/badge/Platforms-19-blue?style=for-the-badge" alt="19 Platforms">
+</p>
 
-An open-source agent framework with a memory system designed from scratch — it detects what's worth remembering, decides when to act on it, and compresses what it passes to the model. The result: an agent that learns faster, forgets less, and costs less to run.
+**The CLI agent that evolves through use.** It distills session experience into domain knowledge, then converts knowledge into executable skills — getting stronger with every conversation. Signal-driven memory detects what matters at zero cost. Distill compression turns 50K chars of tool output into 5K chars of signal. Talk to it from your terminal, Telegram, Discord, Teams, iMessage, or 14 other platforms.
+
+Use any model you want — [OpenRouter](https://openrouter.ai) (200+ models), OpenAI, Anthropic, Google Gemini, Kimi, MiniMax, Ollama, or your own endpoint. Switch with `zorro model` — no code changes, no lock-in.
+
+<table>
+<tr><td><b>Evolving memory</b></td><td>8-type signal detection on every turn (zero API cost). Reviews only when signals warrant it — not blind periodic scans. Domain-partitioned knowledge base with structured G-code entries. Session summaries with learning inventories.</td></tr>
+<tr><td><b>Real terminal UI</b></td><td>Full TUI with multiline editing, slash-command autocomplete, conversation history, interrupt-and-redirect, streaming output, and conversation branching.</td></tr>
+<tr><td><b>Lives where you do</b></td><td>Telegram, Discord, Slack, WhatsApp, Signal, iMessage, Microsoft Teams, WeChat, Feishu, DingTalk, and 9 more — all from a single gateway process.</td></tr>
+<tr><td><b>Intelligent compression</b></td><td>Distill uses a cheap auxiliary LLM to extract task-relevant information from large tool outputs, instead of mechanical head/tail truncation. Quality gates prevent degradation.</td></tr>
+<tr><td><b>100+ tools</b></td><td>Terminal, file operations, web search, browser automation, code execution, vision, TTS, image generation, MCP servers.</td></tr>
+<tr><td><b>Skills system</b></td><td>Agent creates procedural skills from experience, loads them by task relevance, patches them when outdated. User confirmation before saving.</td></tr>
+<tr><td><b>Runs anywhere</b></td><td>Six terminal backends — local, Docker, SSH, Daytona, Singularity, Modal. Serverless options hibernate when idle.</td></tr>
+<tr><td><b>Soul system</b></td><td>SOUL.md defines who the agent IS — principles, memory protocol, skill protocol, voice. Not a one-line "be helpful" instruction.</td></tr>
+</table>
 
 ---
 
