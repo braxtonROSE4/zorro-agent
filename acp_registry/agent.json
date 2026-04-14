@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
-  "name": "hermes-agent",
-  "display_name": "Hermes Agent",
-  "description": "AI agent by Nous Research with 90+ tools, persistent memory, and multi-platform support",
+  "name": "zorro-agent",
+  "display_name": "Zorro Agent",
+  "description": "Self-evolving CLI agent with signal-driven memory, 100+ tools, and 19-platform support",
   "icon": "icon.svg",
   "distribution": {
     "type": "command",
-    "command": "hermes",
+    "command": "zorro",
     "args": ["acp"]
   }
 }
