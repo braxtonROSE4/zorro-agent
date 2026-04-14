@@ -6,19 +6,34 @@ Built on [Hermes Agent](https://github.com/NousResearch/hermes-agent) v0.8.0, th
 
 ---
 
-## Why Not Just Use Hermes?
+## How Does It Compare?
 
-Hermes Agent calls itself "self-improving." In practice, its memory system is:
+Three open-source agent frameworks claim to "learn" across sessions. Here's what each one actually does:
 
-- **A 2,200-character text file** (MEMORY.md) with no structure, no expiration, no domain awareness
-- **A background review that runs blind** — every 10 turns, it forks an agent to read the entire conversation and guess what's worth saving. No signal detection. No priority. Same cost whether the conversation had 10 corrections or zero.
-- **Mechanical truncation** of tool outputs — when `grep` returns 50,000 characters, Hermes keeps the first 40% and last 60%, throwing away the middle. Doesn't matter what was in it.
+| Capability | OpenClaw | Hermes Agent | **Zorro Agent** |
+|---|---|---|---|
+| **Memory storage** | Markdown files + vector search | 2.2K char flat text (MEMORY.md) | 2.2K working memory + **domain-partitioned knowledge base** (G-code structured entries per domain) |
+| **Learning from experience** | None — skills are static, manually maintained | Background agent reviews every 10 turns (blind, no signal detection) | **Signal-driven**: 8-type regex detection every turn (zero cost) → only reviews when signals accumulate |
+| **Skill creation** | Manual only | Agent can create/patch skills autonomously | Agent creates/patches skills + **asks user to confirm** before saving procedural knowledge |
+| **Tool output handling** | Raw truncation | Head 40% + tail 60% (mechanical cut) | **Distill compression**: auxiliary LLM extracts task-relevant information before truncation |
+| **Session boundaries** | No end-of-session processing | No end-of-session processing | **Structured session summaries** with learning signal inventory + closing checklist |
+| **Agent identity** | SOUL.md (persona file) | One-paragraph generic identity | **SOUL.md** with principles, memory protocol, skill protocol, and voice guidelines |
+| **User sentiment** | Not detected | Not detected | **Rating capture** (explicit 1-10) + **frustration/satisfaction detection** (implicit, triggers emergency review) |
+| **Review cost** | N/A (no review) | 1 API call every 10 turns regardless | **0 API calls** when nothing detected; 1 call when signals warrant it |
+| **Platform adapters** | 20+ (gateway-first architecture) | 17 adapters | **19 adapters** (added Microsoft Teams) |
+| **Model support** | Claude, GPT, Gemini, Ollama | 200+ via OpenRouter + direct | 200+ via OpenRouter + direct (same) |
+| **Security** | Known vulnerabilities (ClawJacked, session isolation failures, 40K+ exposed instances) | Pattern-based approval + smart LLM screening | Pattern-based approval + smart LLM screening (same as Hermes) |
+| **Architecture** | Node.js Gateway (hub-and-spoke) | Python agent-first | Python agent-first (same as Hermes) |
 
-Zorro keeps everything Hermes does well (100+ tools, 18 platform adapters, skills system, session search, any-model support) and replaces the memory layer with something that works.
+### The Honest Take
+
+- **OpenClaw** has the best multi-platform coverage (20+ adapters) and a mature gateway architecture, but **zero learning capability** — every skill must be hand-written, and its security track record is concerning.
+- **Hermes** added autonomous skill creation and a background review loop — real progress over OpenClaw — but the review is **blind** (same cost whether there are 10 corrections or zero) and memory is **flat** (one 2.2K file for everything).
+- **Zorro** keeps everything Hermes does well (tools, skills, session search, any-model) and rebuilds the memory layer: **signal detection → smart triggering → domain knowledge → distill compression → session lifecycle**.
 
 ---
 
-## What Zorro Does Differently
+## What Zorro Does Differently (In Detail)
 
 ### Signal-Driven Memory (not blind review)
 
