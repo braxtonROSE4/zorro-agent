@@ -1,69 +1,88 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300" width="1200" height="300">
-  <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#0a0a0f;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#1a1a2e;stop-opacity:1" />
-    </linearGradient>
-    <linearGradient id="slash" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#e94560;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#c81d4e;stop-opacity:1" />
-    </linearGradient>
-    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#e0e0e0;stop-opacity:1" />
-    </linearGradient>
-    <filter id="glow">
-      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-      <feMerge>
-        <feMergeNode in="coloredBlur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-    <filter id="slashGlow">
-      <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
-      <feMerge>
-        <feMergeNode in="coloredBlur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-  </defs>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 320" width="1200" height="320">
+  <rect width="1200" height="320" fill="#0d0d0d"/>
 
-  <!-- Background -->
-  <rect width="1200" height="300" fill="url(#bg)" rx="12"/>
+  <!-- ZORRO-AGENT in massive block letters, pixel art style -->
+  <!-- Each letter is hand-drawn with rectangles to create that chunky pixel/block look -->
 
-  <!-- Subtle grid pattern -->
-  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#ffffff" stroke-width="0.3" opacity="0.05"/>
-  </pattern>
-  <rect width="1200" height="300" fill="url(#grid)" rx="12"/>
+  <g transform="translate(28, 45)" fill="#ffffff">
 
-  <!-- Zorro slash marks (signature Z) -->
-  <g filter="url(#slashGlow)" opacity="0.15">
-    <line x1="80" y1="40" x2="280" y2="40" stroke="#e94560" stroke-width="18" stroke-linecap="round"/>
-    <line x1="280" y1="40" x2="80" y2="260" stroke="#e94560" stroke-width="18" stroke-linecap="round"/>
-    <line x1="80" y1="260" x2="280" y2="260" stroke="#e94560" stroke-width="18" stroke-linecap="round"/>
+    <!-- Z -->
+    <rect x="0" y="0" width="120" height="24"/>
+    <rect x="88" y="24" width="32" height="24"/>
+    <rect x="64" y="48" width="32" height="24"/>
+    <rect x="40" y="72" width="32" height="24"/>
+    <rect x="16" y="96" width="32" height="24"/>
+    <rect x="0" y="120" width="120" height="24"/>
+
+    <!-- O -->
+    <rect x="140" y="0" width="110" height="24"/>
+    <rect x="140" y="0" width="28" height="144"/>
+    <rect x="222" y="0" width="28" height="144"/>
+    <rect x="140" y="120" width="110" height="24"/>
+
+    <!-- R -->
+    <rect x="270" y="0" width="110" height="24"/>
+    <rect x="270" y="0" width="28" height="144"/>
+    <rect x="352" y="0" width="28" height="60"/>
+    <rect x="270" y="48" width="110" height="24"/>
+    <rect x="330" y="72" width="28" height="24"/>
+    <rect x="352" y="96" width="28" height="48"/>
+
+    <!-- R -->
+    <rect x="400" y="0" width="110" height="24"/>
+    <rect x="400" y="0" width="28" height="144"/>
+    <rect x="482" y="0" width="28" height="60"/>
+    <rect x="400" y="48" width="110" height="24"/>
+    <rect x="460" y="72" width="28" height="24"/>
+    <rect x="482" y="96" width="28" height="48"/>
+
+    <!-- O -->
+    <rect x="530" y="0" width="110" height="24"/>
+    <rect x="530" y="0" width="28" height="144"/>
+    <rect x="612" y="0" width="28" height="144"/>
+    <rect x="530" y="120" width="110" height="24"/>
+
+    <!-- dash -->
+    <rect x="665" y="56" width="40" height="24"/>
+
+    <!-- A -->
+    <rect x="730" y="0" width="110" height="24"/>
+    <rect x="730" y="0" width="28" height="144"/>
+    <rect x="812" y="0" width="28" height="144"/>
+    <rect x="730" y="60" width="110" height="24"/>
+
+    <!-- G -->
+    <rect x="860" y="0" width="110" height="24"/>
+    <rect x="860" y="0" width="28" height="144"/>
+    <rect x="860" y="120" width="110" height="24"/>
+    <rect x="942" y="72" width="28" height="72"/>
+    <rect x="910" y="72" width="60" height="24"/>
+
+    <!-- E -->
+    <rect x="990" y="0" width="110" height="24"/>
+    <rect x="990" y="0" width="28" height="144"/>
+    <rect x="990" y="56" width="80" height="24"/>
+    <rect x="990" y="120" width="110" height="24"/>
+
+    <!-- N -->
+    <rect x="1120" y="0" width="28" height="144" fill="none"/>
   </g>
 
-  <!-- Three diagonal slash marks (Zorro's signature) -->
-  <g filter="url(#slashGlow)">
-    <line x1="900" y1="60" x2="980" y2="240" stroke="url(#slash)" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
-    <line x1="940" y1="60" x2="1020" y2="240" stroke="url(#slash)" stroke-width="4" stroke-linecap="round" opacity="0.4"/>
-    <line x1="980" y1="60" x2="1060" y2="240" stroke="url(#slash)" stroke-width="4" stroke-linecap="round" opacity="0.2"/>
+  <!-- Second row: N and T (overflow) + highlight color accent -->
+  <g transform="translate(28, 45)" fill="#ffffff">
+    <!-- N -->
+    <rect x="1120" y="0" width="28" height="144"/>
+    <rect x="1120" y="0" width="24" height="24"/>
+    <rect x="1132" y="24" width="24" height="24"/>
+    <rect x="1144" y="48" width="24" height="24"/>
   </g>
 
-  <!-- Main title -->
-  <text x="600" y="145" text-anchor="middle" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', 'JetBrains Mono', monospace" font-size="88" font-weight="900" fill="url(#textGrad)" filter="url(#glow)" letter-spacing="8">ZORRO</text>
-
-  <!-- Subtitle -->
-  <text x="600" y="200" text-anchor="middle" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', 'JetBrains Mono', monospace" font-size="28" font-weight="400" fill="#e94560" letter-spacing="18" opacity="0.9">A G E N T</text>
+  <!-- Accent: thin red line under the text -->
+  <rect x="28" y="210" width="1144" height="4" fill="#e94560" rx="2"/>
 
   <!-- Tagline -->
-  <text x="600" y="248" text-anchor="middle" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="16" fill="#888888" letter-spacing="2">the cli agent that actually remembers</text>
+  <text x="600" y="252" text-anchor="middle" font-family="'SF Mono', 'Fira Code', 'Cascadia Code', monospace" font-size="20" fill="#666666" letter-spacing="6">THE  CLI  AGENT  THAT  EVOLVES  THROUGH  USE</text>
 
-  <!-- Version badge -->
-  <rect x="540" y="258" width="52" height="20" rx="4" fill="#e94560" opacity="0.8"/>
-  <text x="566" y="272" text-anchor="middle" font-family="monospace" font-size="11" fill="white" font-weight="600">v0.1</text>
-
-  <!-- Accent line bottom -->
-  <rect x="200" y="290" width="800" height="2" rx="1" fill="#e94560" opacity="0.3"/>
+  <!-- Version + dots -->
+  <text x="600" y="290" text-anchor="middle" font-family="monospace" font-size="14" fill="#444444" letter-spacing="3">v0.1.0</text>
 </svg>
