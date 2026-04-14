@@ -146,6 +146,22 @@ def maybe_persist_tool_result(
     if len(content) <= effective_threshold:
         return content
 
+    # Distill: try task-aware LLM compression before persisting to disk.
+    # If compression succeeds and the result fits within threshold, return
+    # it directly — no disk write needed, and the main model sees a clean,
+    # relevant summary instead of a preview + file path.
+    try:
+        from agent.distill import distill_tool_output
+        compressed = distill_tool_output(
+            content=content,
+            tool_name=tool_name,
+            target_chars=max(config.preview_size, effective_threshold // 4),
+        )
+        if compressed and len(compressed) <= effective_threshold:
+            return compressed
+    except Exception as exc:
+        logger.debug("Distill compression skipped: %s", exc)
+
     storage_dir = _resolve_storage_dir(env)
     remote_path = f"{storage_dir}/{tool_use_id}.txt"
     preview, has_more = generate_preview(content, max_chars=config.preview_size)

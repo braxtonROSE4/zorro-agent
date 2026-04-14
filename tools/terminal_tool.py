@@ -1504,17 +1504,32 @@ def terminal_tool(
             # Add helpful message for sudo failures in messaging context
             output = _handle_sudo_failure(output, env_type)
             
-            # Truncate output if too long, keeping both head and tail
+            # Truncate output if too long — try distill compression first,
+            # fall back to mechanical head/tail split.
             MAX_OUTPUT_CHARS = 50000
             if len(output) > MAX_OUTPUT_CHARS:
-                head_chars = int(MAX_OUTPUT_CHARS * 0.4)  # 40% head (error messages often appear early)
-                tail_chars = MAX_OUTPUT_CHARS - head_chars  # 60% tail (most recent/relevant output)
-                omitted = len(output) - head_chars - tail_chars
-                truncated_notice = (
-                    f"\n\n... [OUTPUT TRUNCATED - {omitted} chars omitted "
-                    f"out of {len(output)} total] ...\n\n"
-                )
-                output = output[:head_chars] + truncated_notice + output[-tail_chars:]
+                _distilled = None
+                try:
+                    from agent.distill import distill_tool_output
+                    _distilled = distill_tool_output(
+                        content=output,
+                        tool_name="terminal",
+                        target_chars=MAX_OUTPUT_CHARS // 4,
+                    )
+                except Exception:
+                    pass
+                if _distilled and len(_distilled) <= MAX_OUTPUT_CHARS:
+                    output = _distilled
+                else:
+                    # Fallback: mechanical head/tail truncation
+                    head_chars = int(MAX_OUTPUT_CHARS * 0.4)
+                    tail_chars = MAX_OUTPUT_CHARS - head_chars
+                    omitted = len(output) - head_chars - tail_chars
+                    truncated_notice = (
+                        f"\n\n... [OUTPUT TRUNCATED - {omitted} chars omitted "
+                        f"out of {len(output)} total] ...\n\n"
+                    )
+                    output = output[:head_chars] + truncated_notice + output[-tail_chars:]
 
             # Strip ANSI escape sequences so the model never sees terminal
             # formatting — prevents it from copying escapes into file writes.
