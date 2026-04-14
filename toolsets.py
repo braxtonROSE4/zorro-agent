@@ -317,6 +317,12 @@ TOOLSETS = {
         "includes": []
     },
 
+    "zorro-teams": {
+        "description": "Microsoft Teams bot toolset - enterprise messaging via Azure Bot Framework",
+        "tools": _ZORRO_CORE_TOOLS,
+        "includes": []
+    },
+
     "zorro-homeassistant": {
         "description": "Home Assistant bot toolset - smart home event monitoring and control",
         "tools": _ZORRO_CORE_TOOLS,
@@ -386,7 +392,7 @@ TOOLSETS = {
     "zorro-gateway": {
         "description": "Gateway toolset - union of all messaging platform tools",
         "tools": [],
-        "includes": ["zorro-telegram", "zorro-discord", "zorro-whatsapp", "zorro-slack", "zorro-signal", "zorro-bluebubbles", "zorro-homeassistant", "zorro-email", "zorro-sms", "zorro-mattermost", "zorro-matrix", "zorro-dingtalk", "zorro-feishu", "zorro-wecom", "zorro-wecom-callback", "zorro-weixin", "zorro-webhook"]
+        "includes": ["zorro-telegram", "zorro-discord", "zorro-whatsapp", "zorro-slack", "zorro-signal", "zorro-bluebubbles", "zorro-teams", "zorro-homeassistant", "zorro-email", "zorro-sms", "zorro-mattermost", "zorro-matrix", "zorro-dingtalk", "zorro-feishu", "zorro-wecom", "zorro-wecom-callback", "zorro-weixin", "zorro-webhook"]
     }
 }
 

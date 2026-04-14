@@ -9,7 +9,7 @@ Forked from [Hermes Agent](https://github.com/NousResearch/hermes-agent) v0.8.0 
 - **Persistent Memory** — MEMORY.md / USER.md + pluggable memory providers (Honcho, Mem0, etc.)
 - **Skills System** — YAML+Markdown procedural knowledge, agent-created, self-improving
 - **100+ Tools** — Terminal, file ops, web search, browser, code execution, vision, TTS
-- **Multi-Platform Gateway** — Telegram, Discord, Slack, WhatsApp, Signal, WeChat, and more
+- **Multi-Platform Gateway** — Telegram, Discord, Slack, WhatsApp, Signal, iMessage, Microsoft Teams, WeChat, Feishu, DingTalk, Matrix, and more
 - **Session Search** — FTS5 full-text search across all past conversations
 - **MCP Support** — Model Context Protocol server integration
 - **Any Model** — OpenRouter, OpenAI, Anthropic, local models, or your own endpoint

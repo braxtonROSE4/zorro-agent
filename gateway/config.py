@@ -66,6 +66,7 @@ class Platform(Enum):
     WECOM_CALLBACK = "wecom_callback"
     WEIXIN = "weixin"
     BLUEBUBBLES = "bluebubbles"
+    TEAMS = "teams"
 
 
 @dataclass
@@ -1107,6 +1108,27 @@ def _apply_env_overrides(config: GatewayConfig) -> None:
             platform=Platform.BLUEBUBBLES,
             chat_id=bluebubbles_home,
             name=os.getenv("BLUEBUBBLES_HOME_CHANNEL_NAME", "Home"),
+        )
+
+    # Microsoft Teams
+    teams_app_id = os.getenv("TEAMS_APP_ID")
+    teams_app_password = os.getenv("TEAMS_APP_PASSWORD")
+    if teams_app_id and teams_app_password:
+        if Platform.TEAMS not in config.platforms:
+            config.platforms[Platform.TEAMS] = PlatformConfig()
+        config.platforms[Platform.TEAMS].enabled = True
+        config.platforms[Platform.TEAMS].extra.update({
+            "app_id": teams_app_id,
+            "app_password": teams_app_password,
+            "webhook_host": os.getenv("TEAMS_WEBHOOK_HOST", "0.0.0.0"),
+            "webhook_port": int(os.getenv("TEAMS_WEBHOOK_PORT", "3978")),
+        })
+    teams_home = os.getenv("TEAMS_HOME_CHANNEL")
+    if teams_home and Platform.TEAMS in config.platforms:
+        config.platforms[Platform.TEAMS].home_channel = HomeChannel(
+            platform=Platform.TEAMS,
+            chat_id=teams_home,
+            name=os.getenv("TEAMS_HOME_CHANNEL_NAME", "Home"),
         )
 
     # Session settings

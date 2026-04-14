@@ -356,6 +356,11 @@ PLATFORM_HINTS = {
         "MEDIA:/absolute/path/to/file in your response. Images (.jpg, .png, "
         ".heic) appear as photos and other files arrive as attachments."
     ),
+    "teams": (
+        "You are chatting in Microsoft Teams. Teams supports Markdown formatting "
+        "(bold, italic, code blocks, lists, links). Keep responses professional "
+        "and well-structured. Avoid HTML tags — use Markdown only."
+    ),
     "weixin": (
         "You are on Weixin/WeChat. Markdown formatting is supported, so you may use it when "
         "it improves readability, but keep the message compact and chat-friendly. You can send media files natively: "

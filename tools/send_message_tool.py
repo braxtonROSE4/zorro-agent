@@ -162,6 +162,7 @@ def _handle_send(args):
         "weixin": Platform.WEIXIN,
         "email": Platform.EMAIL,
         "sms": Platform.SMS,
+        "teams": Platform.TEAMS,
     }
     platform = platform_map.get(platform_name)
     if not platform:
