@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/banner.png" alt="Zorro Agent" width="100%">
+  <img src="assets/banner.png?v=2" alt="Zorro Agent" width="100%">
 </p>
 
 # Zorro Agent
