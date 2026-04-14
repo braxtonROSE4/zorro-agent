@@ -2,7 +2,7 @@
 
 **The CLI agent that actually remembers.**
 
-Built on [Hermes Agent](https://github.com/NousResearch/hermes-agent) v0.8.0, then rebuilt with a memory architecture that doesn't just store text — it detects what's worth remembering, decides when to act on it, and compresses what it passes to the model. The result: an agent that learns faster, forgets less, and costs less to run.
+An open-source agent framework with a memory system designed from scratch — it detects what's worth remembering, decides when to act on it, and compresses what it passes to the model. The result: an agent that learns faster, forgets less, and costs less to run.
 
 ---
 
@@ -21,15 +21,15 @@ Three open-source agent frameworks claim to "learn" across sessions. Here's what
 | **User sentiment** | Not detected | Not detected | **Rating capture** (explicit 1-10) + **frustration/satisfaction detection** (implicit, triggers emergency review) |
 | **Review cost** | N/A (no review) | 1 API call every 10 turns regardless | **0 API calls** when nothing detected; 1 call when signals warrant it |
 | **Platform adapters** | 20+ (gateway-first architecture) | 17 adapters | **19 adapters** (added Microsoft Teams) |
-| **Model support** | Claude, GPT, Gemini, Ollama | 200+ via OpenRouter + direct | 200+ via OpenRouter + direct (same) |
-| **Security** | Known vulnerabilities (ClawJacked, session isolation failures, 40K+ exposed instances) | Pattern-based approval + smart LLM screening | Pattern-based approval + smart LLM screening (same as Hermes) |
-| **Architecture** | Node.js Gateway (hub-and-spoke) | Python agent-first | Python agent-first (same as Hermes) |
+| **Model support** | Claude, GPT, Gemini, Ollama | 200+ via OpenRouter + direct | 200+ via OpenRouter + direct providers |
+| **Security** | Known vulnerabilities (ClawJacked, session isolation failures, 40K+ exposed instances) | Pattern-based approval + smart LLM screening | Pattern-based approval + smart LLM screening + secret redaction |
+| **Architecture** | Node.js Gateway (hub-and-spoke) | Python agent-first | Python agent-first with lifecycle hooks |
 
 ### The Honest Take
 
 - **OpenClaw** has the best multi-platform coverage (20+ adapters) and a mature gateway architecture, but **zero learning capability** — every skill must be hand-written, and its security track record is concerning.
 - **Hermes** added autonomous skill creation and a background review loop — real progress over OpenClaw — but the review is **blind** (same cost whether there are 10 corrections or zero) and memory is **flat** (one 2.2K file for everything).
-- **Zorro** keeps everything Hermes does well (tools, skills, session search, any-model) and rebuilds the memory layer: **signal detection → smart triggering → domain knowledge → distill compression → session lifecycle**.
+- **Zorro** is built for memory-first operation: **signal detection → smart triggering → domain knowledge → distill compression → session lifecycle**. Full-featured CLI, 19 platform adapters, 100+ tools, and a skills system — all with a memory layer designed to make each session smarter than the last.
 
 ---
 
@@ -83,7 +83,7 @@ Zorro tries **task-aware compression first**: it sends the output to a cheap aux
 - If compressed output is ≥80% of input → compression failed → fall back to head/tail
 - If output looks like meta-commentary ("here is a summary") → rejected → fall back
 
-When it works (and it usually does), 50K chars becomes 5K chars of pure signal. When it doesn't, you get the same head/tail truncation Hermes uses. No downside.
+When it works (and it usually does), 50K chars becomes 5K chars of pure signal. When it doesn't, the system falls back to head/tail truncation. No downside.
 
 ### Session Lifecycle (not just "while True: chat()")
 
@@ -112,13 +112,11 @@ Zorro has a **SOUL.md** — a full identity document with principles, memory pro
 
 ---
 
-## Everything Else (Inherited from Hermes, Working as-Is)
-
-Zorro isn't a rewrite — it's Hermes with a better brain. Everything below works exactly as it does in Hermes:
+## Core Capabilities
 
 <table>
 <tr><td><b>Full TUI</b></td><td>prompt_toolkit-based terminal UI with multiline editing, slash commands, tab completion, streaming output, interrupt handling, and conversation branching.</td></tr>
-<tr><td><b>18 Platform Adapters</b></td><td>Telegram, Discord, Slack, WhatsApp, Signal, iMessage, Microsoft Teams, WeChat, WeCom, Feishu, DingTalk, Matrix, Mattermost, Email, SMS, Home Assistant, API Server, Webhooks.</td></tr>
+<tr><td><b>19 Platform Adapters</b></td><td>Telegram, Discord, Slack, WhatsApp, Signal, iMessage, Microsoft Teams, WeChat, WeCom, Feishu, DingTalk, Matrix, Mattermost, Email, SMS, Home Assistant, API Server, Webhooks.</td></tr>
 <tr><td><b>100+ Tools</b></td><td>Terminal, file operations, web search, browser automation, code execution, vision, TTS, image generation, MCP servers.</td></tr>
 <tr><td><b>Skills System</b></td><td>YAML+Markdown procedural knowledge. Agent creates skills from experience, loads them by task relevance, patches them when outdated. Skills Hub for community sharing.</td></tr>
 <tr><td><b>Session Search</b></td><td>FTS5 full-text search across all past conversations with LLM-powered summarization. The agent can recall any past interaction.</td></tr>
